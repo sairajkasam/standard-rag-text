@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 
 
 @dataclass
@@ -8,6 +9,11 @@ class ChunkType:
     PARAGRAPH = "paragraph"
     SLIDING_WINDOW = "sliding_window"
     HYBRID = "hybrid"
+
+
+class GenericChunkType(Enum):
+    SENTENCE = ChunkType.SENTENCE
+    PARAGRAPH = ChunkType.PARAGRAPH
 
 
 @dataclass

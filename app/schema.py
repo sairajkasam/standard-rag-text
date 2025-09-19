@@ -2,27 +2,29 @@ from typing import Generic, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
+from app.constants import ChunkType, GenericChunkType
+
 DataT = TypeVar("DataT")
 
 
 class FixedChunkRequest(BaseModel):
-    type: str
+    type: str = Field(ChunkType.FIXED)
     chunk_size: int
     overlap: int
 
 
 class GenericChunkRequest(BaseModel):
-    type: str
+    type: GenericChunkType
 
 
 class SlidingWindowChunkRequest(BaseModel):
-    type: str
+    type: str = Field(ChunkType.SLIDING_WINDOW)
     window_size: int
     stride: int
 
 
 class HybridChunkRequest(BaseModel):
-    type: str
+    type: str = Field(ChunkType.HYBRID)
     max_chars: Optional[int] = Field(1000)
     max_sentences: Optional[int] = Field(10)
     overlap_sentences: Optional[int] = Field(1)
