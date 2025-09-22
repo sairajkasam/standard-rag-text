@@ -21,3 +21,9 @@ class ModelProvider:
     OPENAI = "openai"
     NVIDIA = "nvidia"
     HUGGINGFACE = "huggingface"
+
+
+@dataclass
+class EmbeddingType:
+    SPARSE = "sparse"
+    DENSE = "dense"

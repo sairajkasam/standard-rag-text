@@ -7,8 +7,11 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
 from app.schema import RagPayload
+from embeddings import EmbedderModel, ProcessEmbedding
+from indexing.weavite import create_client, ensure_collection_simple
 from text_chunk import ChunkPlugin
 from utils.logger import get_logger
+from vectorizing.weavite import insert_data_batches
 
 app = FastAPI()
 logger = get_logger(__name__)
@@ -25,6 +28,21 @@ def _process_file(payload: RagPayload, text_file: pathlib.Path) -> Dict[str, Any
         chunk_plugin = ChunkPlugin()
         result = chunk_plugin.process_chunk(payload, text_file)
         count = len(result) if result is not None else 0
+
+        model_provider = EmbedderModel(payload)
+        embedder = model_provider.get_embedder()
+
+        processor = ProcessEmbedding(embedder, payload)
+        embeddings = processor.embed_texts(result)
+        breakpoint()
+        client = create_client()
+        ensure_collection_simple(
+            client,
+            collection_name=payload.index_name,
+            vector_type=payload.embedding_type,
+            recreate=payload.recreate_index,
+        )
+        insert_data_batches(client, payload.model_dump(mode="json"), embeddings)
 
         return {"filename": text_file.name, "chunks": count, "error": None}
     except Exception as exc:

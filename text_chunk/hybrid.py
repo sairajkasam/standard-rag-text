@@ -114,8 +114,7 @@ class HybridChunkProcessor:
                     "id": _make_id("hyb"),
                     "source": file_path.name,
                     "chunk_index": chunk_idx,
-                    "text": chunk_text,
-                    "sentences_count": s_count,
+                    "text": chunk_text
                 }
             )
 

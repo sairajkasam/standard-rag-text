@@ -46,4 +46,8 @@ ChunkRequest = Union[
 
 class RagPayload(RagRequest[ChunkRequest]):
     model_provider: str
-    model_name: str
+    model_name: str = None
+    embedding_type: str
+    index_name: str
+    vector_database: str
+    recreate_index: bool = False
