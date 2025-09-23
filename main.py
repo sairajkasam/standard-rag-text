@@ -17,7 +17,9 @@ app = FastAPI()
 logger = get_logger(__name__)
 
 
-def _process_file(payload: RagPayload, text_file: pathlib.Path) -> Dict[str, Any]:
+def _process_file(
+    payload: RagPayload, text_file: pathlib.Path, client
+) -> Dict[str, Any]:
     """
     Worker executed in threadpool for each file.
     Returns a dict with filename, chunk_count, and optional error.
@@ -34,16 +36,8 @@ def _process_file(payload: RagPayload, text_file: pathlib.Path) -> Dict[str, Any
 
         processor = ProcessEmbedding(embedder, payload)
         embeddings = processor.embed_texts(result)
-        breakpoint()
-        client = create_client()
-        ensure_collection_simple(
-            client,
-            collection_name=payload.index_name,
-            vector_type=payload.embedding_type,
-            recreate=payload.recreate_index,
-        )
-        insert_data_batches(client, payload.model_dump(mode="json"), embeddings)
 
+        insert_data_batches(client, payload.model_dump(mode="json"), embeddings)
         return {"filename": text_file.name, "chunks": count, "error": None}
     except Exception as exc:
         logger.exception(f"Error processing file {text_file.name}: {exc}")
@@ -70,10 +64,19 @@ async def standard_rag_text(payload: RagPayload):
     cpu_count = os.cpu_count() or 1
     max_workers = min(32, len(text_files), cpu_count * 5)
 
+    client = create_client()
+    ensure_collection_simple(
+        client,
+        collection_name=payload.index_name,
+        vector_type=payload.embedding_type,
+        recreate=payload.recreate_index,
+    )
     results = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         # submit all file-processing tasks
-        futures = {executor.submit(_process_file, payload, f): f for f in text_files}
+        futures = {
+            executor.submit(_process_file, payload, f, client): f for f in text_files
+        }
 
         # collect results as they finish
         for fut in concurrent.futures.as_completed(futures):
@@ -94,6 +97,6 @@ async def standard_rag_text(payload: RagPayload):
         "total_chunks": total_chunks,
         "errors": errors,
     }
-
+    client.close()
     status = 200 if not errors else 207  # 207 Partial Success if some files failed
     return JSONResponse(response, status_code=status)

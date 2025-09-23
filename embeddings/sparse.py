@@ -1,7 +1,8 @@
 import uuid
 from typing import Any, Dict, List, Optional
-from sklearn.feature_extraction.text import TfidfVectorizer
+
 from langchain_openai import OpenAIEmbeddings
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from utils.logger import get_logger
 
@@ -60,11 +61,7 @@ def sparse_embedding(
             emb = {"indices": indices, "values": values}
             dense_emb = embedder.embed_query(chunk.get("text"))
             updated = {
-                "id": obj_id,
-                "text": chunk.get("text", ""),
-                "source": chunk.get("source"),
-                "chunk_index": chunk.get("chunk_index"),
-                "embedding_type": "sparse",
+                **chunk,
                 "sparse_embedding": emb,
                 "dense_embedding": [
                     float(x) for x in dense_emb

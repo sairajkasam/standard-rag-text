@@ -9,6 +9,7 @@ class ChunkType:
     PARAGRAPH = "paragraph"
     SLIDING_WINDOW = "sliding_window"
     HYBRID = "hybrid"
+    SLIDING_PARAGRAPH = "sliding_paragraph"
 
 
 class GenericChunkType(Enum):

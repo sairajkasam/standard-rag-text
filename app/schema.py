@@ -18,7 +18,7 @@ class GenericChunkRequest(BaseModel):
 
 
 class SlidingWindowChunkRequest(BaseModel):
-    type: str = Field(ChunkType.SLIDING_WINDOW)
+    type: str
     window_size: int
     stride: int
 

@@ -1,7 +1,8 @@
 from typing import Any, Dict, List
 
-from utils.logger import get_logger
 from weaviate.exceptions import WeaviateInvalidInputError
+
+from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -9,12 +10,23 @@ logger = get_logger(__name__)
 def insert_data_batches(
     client: Any, input_payload: Dict[str, Any], data: List[Dict[str, Any]]
 ) -> Dict[str, int]:
-    collection = client.collections.get(input_payload["index_name"])
+    collection = client.collections.use(input_payload["index_name"])
     embedding_type = input_payload.get("embedding_type")
     try:
-        with collection.batch.dynamic() as batch:
+        with collection.batch.fixed_size(batch_size=200) as batch:
             for d in data:
-                properties = {"chunks": d.get("text")}
+                properties = {
+                    "chunks": d.get("text"),
+                    "source": d.get("source"),
+                    "chunk_id": d.get("id"),
+                    "chunk_index": d.get("chunk_index"),
+                    "embedding_type": embedding_type,
+                    "story_title": d.get("story_title"),
+                    "chapter_index": d.get("chapter_index"),
+                    "paragraph_range": str(d.get("paragraph_range")),
+                    "char_start": d.get("char_start"),
+                    "char_end": d.get("char_end"),
+                }
 
                 # --- FIX: The vector assignments are now correct ---
                 if embedding_type == "dense":

@@ -8,6 +8,7 @@ from text_chunk.fixed import FixedChunkProcessor
 from text_chunk.hybrid import HybridChunkProcessor
 from text_chunk.paragraph import ParagraphChunkProcessor
 from text_chunk.sentance import SentenceChunkProcessor
+from text_chunk.sliding_paragraph import ParagraphSlidingChunkProcessor
 from text_chunk.sliding_window import SlidingWindowChunkProcessor
 from utils.logger import get_logger
 
@@ -26,6 +27,7 @@ class ChunkPlugin:
             ChunkType.PARAGRAPH: ParagraphChunkProcessor,
             ChunkType.SLIDING_WINDOW: SlidingWindowChunkProcessor,
             ChunkType.HYBRID: HybridChunkProcessor,
+            ChunkType.SLIDING_PARAGRAPH: ParagraphSlidingChunkProcessor,
         }
         processor_cls = chunk_types.get(payload.chunking.type)
 

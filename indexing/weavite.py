@@ -1,10 +1,11 @@
 from altair import DataType
+from weaviate.classes.config import Configure
+from weaviate.classes.config import DataType as dt
+from weaviate.classes.config import Property
 from weaviate.config import AdditionalConfig, Timeout
 
 from app.config import Config
 from utils.logger import get_logger
-from weaviate.classes.config import Configure, Property
-from weaviate.classes.config import DataType as dt
 
 logger = get_logger(__name__)
 
@@ -24,7 +25,7 @@ def create_client():
         grpc_secure=False,
         skip_init_checks=True,
         additional_config=AdditionalConfig(
-            timeout=Timeout(init=30, query=30, insert=320)
+            timeout=Timeout(init=30000, query=30000, insert=32000)
         ),
     )
     logger.info(f"Weaviate ready: {client.is_ready()}")
@@ -72,7 +73,18 @@ def ensure_collection_simple(
             logger.warning("Failed to delete existing collection: %s", e)
 
     # Define common properties for the collection.
-    collection_properties = [Property(name="chunks", data_type=dt.TEXT_ARRAY)]
+    collection_properties = [
+        Property(name="chunks", data_type=dt.TEXT_ARRAY),
+        Property(name="source", data_type=dt.TEXT),
+        Property(name="chunk_id", data_type=dt.TEXT),
+        Property(name="chunk_index", data_type=dt.INT),
+        Property(name="embedding_type", data_type=dt.TEXT),
+        Property(name="story_title", data_type=dt.TEXT),
+        Property(name="chapter_index", data_type=dt.INT),
+        Property(name="paragraph_range", data_type=dt.TEXT),
+        Property(name="char_start", data_type=dt.INT),
+        Property(name="char_end", data_type=dt.INT),
+    ]
 
     vectorizer_config = []
 
